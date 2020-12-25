@@ -7,12 +7,12 @@
                     class="_1adminOverveiw_table_recent _box_shadow _border_radious _mar_b30 _p20"
                 >
                     <p class="_title0">
-                        Tags
+                        Categories
                         <Button
                             type="success"
                             size="small"
                             @click="addModal = true"
-                            ><Icon type="md-add" /> Add tag</Button
+                            ><Icon type="md-add" /> Add category</Button
                         >
                     </p>
 
@@ -21,7 +21,8 @@
                             <!-- TABLE TITLE -->
                             <tr>
                                 <th>ID</th>
-                                <th>Tag Name</th>
+                                <th>Category Image</th>
+                                <th>Category Name</th>
                                 <th>Created At</th>
                                 <th>Action</th>
                             </tr>
@@ -29,26 +30,37 @@
 
                             <!-- ITEMS -->
                             <tr
-                                v-for="(tag, i) in tags"
+                                v-for="(category, i) in categories"
                                 :key="i"
-                                v-if="tags.length"
+                                v-if="categories.length"
                             >
-                                <td>{{ tag.id }}</td>
-                                <td class="_table_name">
-                                    {{ tag.tagName }}
+                                <td>{{ category.id }}</td>
+                                <td>
+                                    <div
+                                        class="category-image"
+                                        v-if="category.iconImage"
+                                    >
+                                        <template>
+                                            <img :src="category.iconImage" />
+                                        </template>
+                                    </div>
+                                    
                                 </td>
-                                <td>{{ tag.created_at }}</td>
+                                <td class="_table_name">
+                                    {{ category.categoryName }}
+                                </td>
+                                <td>{{ category.created_at }}</td>
                                 <td>
                                     <Button
                                         type="warning"
                                         size="small"
-                                        @click="showEditModal(tag)"
+                                        @click="showEditModal(category)"
                                         >Edit</Button
                                     >
                                     <Button
                                         type="error"
                                         size="small"
-                                        @click="showDeleteModal(tag)"
+                                        @click="showDeleteModal(category)"
                                         >Delete</Button
                                     >
                                 </td>
@@ -61,13 +73,55 @@
                 <!-- Tag adding modal -->
                 <Modal
                     v-model="addModal"
-                    title="Add tag"
+                    title="Add Category"
                     :mask-closable="false"
                 >
                     <Input
-                        v-model="data.tagName"
-                        placeholder="Enter tag name"
+                        v-model="data.categoryName"
+                        placeholder="Enter category name"
                     />
+                    <br /><br />
+
+                    <div class="demo-upload-list" v-if="data.iconImage">
+                        <template>
+                            <img
+                                :src="`/uploads/categories/${data.iconImage}`"
+                            />
+                            <div class="demo-upload-list-cover">
+                                <Icon
+                                    type="ios-trash-outline"
+                                    @click.native="handleRemove()"
+                                ></Icon>
+                            </div>
+                        </template>
+                    </div>
+
+                    <Upload
+                        ref="upload"
+                        :on-success="handleSuccess"
+                        :format="['jpg', 'jpeg', 'png']"
+                        :max-size="2048"
+                        :on-format-error="handleFormatError"
+                        :on-exceeded-size="handleMaxSize"
+                        :before-upload="handleBeforeUpload"
+                        :on-error="handleError"
+                        type="drag"
+                        action="/app/upload_category_icon"
+                        :headers="{
+                            'x-csrf-token': token,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }"
+                        style="display: inline-block;width:50%;"
+                    >
+                        <div style="padding: 20px 0">
+                            <Icon
+                                type="ios-cloud-upload"
+                                size="52"
+                                style="color: #3399ff"
+                            ></Icon>
+                            <p>Click or drag files here to upload</p>
+                        </div>
+                    </Upload>
 
                     <div slot="footer">
                         <Button
@@ -79,7 +133,7 @@
                         <Button
                             type="success"
                             size="small"
-                            @click="addTag"
+                            @click="addCategory"
                             :disabled="isAdding"
                             :loading="isAdding"
                             >{{ isAdding ? "Submitting.." : "Submit" }}</Button
@@ -90,13 +144,53 @@
                 <!-- Tag editing modal -->
                 <Modal
                     v-model="editModal"
-                    title="Edit tag"
+                    title="Edit category"
                     :mask-closable="false"
                 >
                     <Input
-                        v-model="editData.tagName"
-                        placeholder="Enter tag name"
+                        v-model="editData.categoryName"
+                        placeholder="Enter category name"
                     />
+                    <br/><br/>
+
+                    <div class="demo-upload-list" v-if="editData.iconImage">
+                        <template>
+                            <img :src="editData.iconImage"/>
+                            <div class="demo-upload-list-cover">
+                                <Icon
+                                    type="ios-trash-outline"
+                                    @click.native="handleRemove(true)"
+                                ></Icon>
+                            </div>
+                        </template>
+                    </div>
+
+                    <Upload
+                        ref="editUpload"
+                        :on-success="handleEditSuccess"
+                        :format="['jpg', 'jpeg', 'png']"
+                        :max-size="2048"
+                        :on-format-error="handleFormatError"
+                        :on-exceeded-size="handleMaxSize"
+                        :before-upload="handleBeforeUpload"
+                        :on-error="handleError"
+                        type="drag"
+                        action="/app/upload_category_icon"
+                        :headers="{
+                            'x-csrf-token': token,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }"
+                        style="display: inline-block;width:50%;"
+                    >
+                        <div style="padding: 20px 0">
+                            <Icon
+                                type="ios-cloud-upload"
+                                size="52"
+                                style="color: #3399ff"
+                            ></Icon>
+                            <p>Click or drag files here to upload</p>
+                        </div>
+                    </Upload>
 
                     <div slot="footer">
                         <Button
@@ -108,7 +202,7 @@
                         <Button
                             type="success"
                             size="small"
-                            @click="editTag"
+                            @click="editCategory"
                             :disabled="isAdding"
                             :loading="isAdding"
                             >{{ isAdding ? "Editing..." : "Submit" }}</Button
@@ -123,21 +217,23 @@
                         <span>Delete confirmation</span>
                     </p>
                     <div style="text-align:left">
-                        <Input
-                            v-model="editData.id"
-							disabled
-                        >
-						<span slot="prepend">Tag Id</span>
-						</Input>
-						<br>
-                        <Input
-                            v-model="editData.tagName"
-							disabled
-                        >
-						<span slot="prepend">Tag Name</span>
-						</Input>
-						
-                        
+                        <Input v-model="editData.id" disabled>
+                            <span slot="prepend">Category Id</span>
+                        </Input>
+                        <br/>
+                        <Input v-model="editData.categoryName" disabled>
+                            <span slot="prepend">Category Name</span>
+                        </Input>
+                        <br/>
+                        <div
+                                        class="category-image"
+                                        v-if="editData.iconImage"
+                                    >
+                                        <template>
+                                            <img :src="editData.iconImage" />
+                                        </template>
+                                    </div>
+                        <br/>
                     </div>
                     <div style="text-align:center">
                         <p>Are you sure, you want to delete it?</p>
@@ -146,11 +242,11 @@
                         <Button
                             type="error"
                             size="large"
-							long
-                            @click="deleteTag(editData.id)"
-							:disabled="isLoading"
+                            long
+                            @click="deleteCategory(editData.id)"
+                            :disabled="isLoading"
                             :loading="isLoading"
-                            >{{isLoading ? 'Deleting...' : 'Delete'}}</Button
+                            >{{ isLoading ? "Deleting..." : "Delete" }}</Button
                         >
                     </div>
                 </Modal>
@@ -164,39 +260,117 @@ export default {
     data() {
         return {
             data: {
-                tagName: ""
+                iconImage: "",
+                categoryName: ""
             },
             editData: {
                 id: "",
-                tagName: ""
+                iconImage: "",
+                categoryName: ""
             },
             addModal: false,
             editModal: false,
             deleteModal: false,
             isAdding: false,
             isLoading: false,
-            tags: []
+            categories: [],
+            token: "",
+            image: []
         };
     },
     methods: {
-        async addTag() {
-            if (this.data.tagName.trim() == "") {
-                return this.error("Tag Name is required", "Ooops");
+        async handleRemove(isEdit=false) {
+            let file = ''
+            if(isEdit){
+                var n = this.editData.iconImage.lastIndexOf('/');
+                var result = this.editData.iconImage.substring(n + 1);
+                file = result;
+                this.editData.iconImage = "";
+                this.$refs.editUpload.clearFiles();
+            }else{
+                file = this.data.iconImage;
+                this.data.iconImage = "";
+                this.$refs.upload.clearFiles();
             }
+                        
+            const res = await this.callApi(
+                "post",
+                "app/delete_category_image",
+                {imageName: file}
+            );
+
+            if (res.status !== 200) {
+                this.data.iconImage = file;
+                this.genError();
+            }
+        },
+        handleSuccess(res, file) {
+            this.data.iconImage = res;
+            this.image = [
+                {
+                    url: res,
+                    name: res
+                }
+            ];
+        },
+        handleEditSuccess(res, file) {
+            this.editData.iconImage = `/uploads/categories/${res}`;
+        },
+        handleFormatError(file) {
+            this.$Notice.warning({
+                title: "The file format is incorrect",
+                desc:
+                    "File format of " +
+                    file.name +
+                    " is incorrect, please select jpg or png."
+            });
+        },
+        handleMaxSize(file) {
+            this.$Notice.warning({
+                title: "Exceeding file size limit",
+                desc: "File  " + file.name + " is too large, no more than 2M."
+            });
+        },
+        handleBeforeUpload() {
+            const check = this.image.length < 5;
+            if (!check) {
+                this.$Notice.warning({
+                    title: "Up to five pictures can be uploaded."
+                });
+            }
+            return check;
+        },
+        handleError(res, file) {
+            this.genError(file.errors.file[0]);
+        },
+        async addCategory() {
+            if (this.data.iconImage.trim() == "")
+                return this.error("Category Image is required", "Oops");
+            if (this.data.categoryName.trim() == "")
+                return this.error("Category Name is required", "Oops");
+
+            this.data.iconImage = `/uploads/categories/${this.data.iconImage}`;
 
             this.isAdding = true;
-            const res = await this.callApi("post", "app/create_tag", this.data);
+            const res = await this.callApi(
+                "post",
+                "app/create_category",
+                this.data
+            );
 
             if (res.status == 201) {
-                this.tags.unshift(res.data);
-                this.success("Tag has been added successfully!");
+                this.categories.unshift(res.data);
+                this.success("Category has been added successfully!");
                 this.addModal = false;
             } else {
                 this.addModal = false;
 
                 if (res.status == 422) {
-                    if (res.data.errors.tagName) {
-                        this.genError(res.data.errors.tagName[0]);
+                    if (res.data.errors.categoryName) {
+                        this.genError(res.data.errors.categoryName[0]);
+                    }
+                    if (res.data.errors.iconImage) {
+                        this.genError(res.data.errors.iconImage[0]);
                     }
                 } else {
                     this.genError();
@@ -205,28 +379,32 @@ export default {
             this.clearData();
             this.isAdding = false;
         },
-        async editTag() {
-            if (this.editData.tagName.trim() == "") {
-                return this.error("Tag Name is required", "Ooops");
-            }
+        async editCategory() {
+            if (this.editData.iconImage.trim() == "")
+                return this.error("Category Image is required", "Oops");
+            if (this.editData.categoryName.trim() == "")
+                return this.error("Category Name is required", "Oops");
+
+            //this.editData.iconImage = `/uploads/categories/${this.editData.iconImage}`;
 
             this.isAdding = true;
+
             const res = await this.callApi(
                 "put",
-                "app/edit_tag",
+                "app/edit_category",
                 this.editData
             );
 
             if (res.status == 200) {
-                this.tags = res.data;
-                this.success("Tag has been updated successfully!");
+                this.categories = res.data;
+                this.success("Category has been updated successfully!");
                 this.editModal = false;
             } else {
                 this.editModal = false;
 
                 if (res.status == 422) {
-                    if (res.data.errors.tagName) {
-                        this.genError(res.data.errors.tagName[0]);
+                    if (res.data.errors.categoryName) {
+                        this.genError(res.data.errors.categoryName[0]);
                     }
                 } else {
                     this.genError();
@@ -235,62 +413,69 @@ export default {
             this.clearData();
             this.isAdding = false;
         },
-        showEditModal(tag) {
-            let tagObj = {
-                id: tag.id,
-                tagName: tag.tagName
+        showEditModal(category) {
+            let categoryObj = {
+                id: category.id,
+                iconImage: category.iconImage,
+                categoryName: category.categoryName
             };
-            this.editData = tagObj;
+            this.editData = categoryObj;
             this.editModal = true;
         },
-        async deleteTag(id) {
-			this.isLoading = true
+        async deleteCategory(id) {
+            this.isLoading = true;
 
-			const res = await this.callApi(
+            const res = await this.callApi(
                 "delete",
-                "app/delete_tag",
+                "app/delete_category",
                 this.editData
-			);
-			
-			if (res.status == 200) {
-                this.tags = res.data;
-                this.success("Tag has been deleted successfully!");
+            );
+
+            if (res.status == 200) {
+                this.categories = res.data;
+                this.success("Category has been deleted successfully!");
                 this.editModal = false;
             } else {
                 this.editModal = false;
 
                 if (res.status == 422) {
-                    if (res.data.errors.tagName) {
-                        this.genError(res.data.errors.tagName[0]);
+                    if (res.data.errors.categoryName) {
+                        this.genError(res.data.errors.categoryName[0]);
                     }
                 } else {
                     this.genError();
                 }
-			}
-			
-			this.isLoading = false;
-			this.deleteModal = false;
-		},
-        showDeleteModal(tag) {
+            }
+
+            this.isLoading = false;
+            this.deleteModal = false;
+        },
+        showDeleteModal(category) {
             this.deleteModal = true;
-            let tagObj = {
-                id: tag.id,
-                tagName: tag.tagName
+            let categoryObj = {
+                id: category.id,
+                categoryName: category.categoryName,
+                iconImage: category.iconImage
             };
-            this.editData = tagObj;
+            this.editData = categoryObj;
         },
         clearData() {
-            this.data.tagName = "";
+            this.data.categoryName = "";
+            this.data.iconImage = "";
+            this.$refs.upload.clearFiles();
+            this.$refs.editUpload.clearFiles();
         }
     },
     async created() {
-        const res = await this.callApi("get", "app/get_tags");
+        this.token = window.Laravel.csrfToken;
+        const res = await this.callApi("get", "app/get_categories");
 
         if (res.status == 200) {
-            this.tags = res.data;
+            this.categories = res.data;
         } else {
             this.genError();
         }
     }
 };
 </script>
+

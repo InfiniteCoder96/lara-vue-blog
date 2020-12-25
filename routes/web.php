@@ -18,6 +18,13 @@ Route::get('app/get_tags', 'AdminController@getTags');
 Route::put('app/edit_tag', 'AdminController@editTag');
 Route::delete('app/delete_tag', 'AdminController@deleteTag');
 
+Route::post('app/create_category', 'AdminController@addCategory');
+Route::get('app/get_categories', 'AdminController@getCategories');
+Route::put('app/edit_category', 'AdminController@editCategory');
+Route::delete('app/delete_category', 'AdminController@deleteCategory');
+Route::post('/app/upload_category_icon', 'AdminController@uploadCategoryImage');
+Route::post('/app/delete_category_image', 'AdminController@deleteCategoryImage');
+
 Route::get('/', function () {
     return view('welcome');
 });

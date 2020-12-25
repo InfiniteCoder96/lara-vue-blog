@@ -13,6 +13,7 @@ import aboutPage from './components/pages/about';
 // basics
 import hooks from './components/pages/basic/hooks.vue';
 import methods from './components/pages/basic/methods.vue';
+import usecom from './vuex/useComp.vue';
 
 const routes = [
     // projects routes
@@ -49,6 +50,12 @@ const routes = [
     {
         path: '/methods',
         component: methods
+    },
+
+    // vuex
+    {
+        path: '/testvuex',
+        component: usecom
     }
 ]
 
